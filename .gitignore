@@ -1,3 +1,11 @@
+# ignore reddit config
+reddit.json
+
+# ignore vscode settings
+.vscode/
+
+# ------ PYTHON ------
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
