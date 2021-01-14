@@ -1,5 +1,5 @@
 # ignore reddit config
-reddit.json
+redditConfig.json
 
 # ignore vscode settings
 .vscode/

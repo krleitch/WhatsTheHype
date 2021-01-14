@@ -1,8 +1,12 @@
 # WhatsTheHype
 
+### Get yfinance
+
+pip install yfinance
+
 ### Setup Reddit Config
 
-reddit.json
+redditConfig.json
 ```
 {
     "clientId": "",
