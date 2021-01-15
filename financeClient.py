@@ -1,4 +1,4 @@
-import yfinance
+import yfinance as yf
 
 class FinanceClient:
 
@@ -9,4 +9,5 @@ class FinanceClient:
     def test(self):
 
         tsla = yf.Ticker("TSLA")
-        print(tsla.info)
+        hist = tsla.history(period="max")
+        return hist

@@ -1,8 +1,15 @@
 # WhatsTheHype
 
-### Get yfinance
+### Requirements
 
-pip install yfinance
+pip install yfinance, pandas, numpy, matplotlib
+
+#### MAC OS Permission
+
+```
+cd /Applications/Python\ 3.X/
+./Install\ Certificates.command
+```
 
 ### Setup Reddit Config
 
