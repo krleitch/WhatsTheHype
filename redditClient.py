@@ -21,10 +21,13 @@ class RedditClient:
         # add auth token to headers
         self.headers = {**headers, **{'Authorization': f"bearer {TOKEN}"}}
 
-    def test(self):
+    def getSubredditTickerCount(self, subreddit, ticker):
 
-        payload = {'q': 'TSLA', 'restrict_sr': 'on'}
-        test = requests.get('https://oauth.reddit.com/r/wallstreetbets/search.json', params=payload, headers=self.headers)
+        payload = {'q': ticker, 'restrict_sr': 'on'}
+        url = 'https://oauth.reddit.com/r/' + subreddit + '/search.json'
+        test = requests.get(url, params=payload, headers=self.headers)
+
+        return len(test.json()['data']['children'])
 
         # needed for comments
         # https://github.com/pushshift/api
@@ -35,5 +38,5 @@ class RedditClient:
         # https://api.pushshift.io/reddit/search/comment/?q=tsla&after=24h&aggs=link_id&size=0
 
         # gets titles
-        for i in (test.json()['data']['children']):
-            print(i['data']['title'])
+        # for i in (test.json()['data']['children']):
+            # print(i['data']['title'])

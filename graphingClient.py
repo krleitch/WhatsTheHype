@@ -6,13 +6,15 @@ class GraphingClient:
 
     def __init__(self):
 
-        print('creating graphing client')
         plt.close("all")
 
-    def test(self, hist):
+    def graphTickerAndHistory(self, subredditTickerCount, tickerHistory):
 
-        # print(hist.keys())
-        hist['Close'].plot(label='TEST', figsize=(16,8), title="test")
+        # rolling average
+        tickerHistory['MA50'] = tickerHistory['Close'].rolling(50).mean()
+        tickerHistory[['Close', 'MA50']].plot(label='count', figsize=(16,8), title="Mentions")
         plt.legend()
         plt.show()
+
+        # save graph
         #df.to_csv("foo.csv")

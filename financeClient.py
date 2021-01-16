@@ -3,11 +3,9 @@ import yfinance as yf
 class FinanceClient:
 
     def __init__(self):
+        pass
 
-        print('creating finance client')
+    def getTickerHistory(self, ticker):
 
-    def test(self):
-
-        tsla = yf.Ticker("TSLA")
-        hist = tsla.history(period="max")
-        return hist
+        tsla = yf.Ticker(ticker)
+        return tsla.history(period="max")
