@@ -2,10 +2,18 @@ import yfinance as yf
 
 class FinanceClient:
 
-    def __init__(self):
-        pass
+    def __init__(self, ticker):
+        self.tickerData = yf.Ticker(ticker)
 
-    def getTickerHistory(self, ticker):
+    def getTickerHistoryForPeriod(self, period):
 
-        tsla = yf.Ticker(ticker)
-        return tsla.history(period="max")
+        if (period == 'day' ):
+            return self.tickerData.history(period="1d")
+        elif (period == 'week'):
+            return self.tickerData.history(period="7d")
+        elif (period == 'month'):
+            return self.tickerData.history(period="1mo")
+        elif (period == 'year'):
+            return self.tickerData.history(period="1y")
+        else:
+            return self.tickerData.history(period="max")

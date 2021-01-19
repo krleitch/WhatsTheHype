@@ -5,14 +5,16 @@ import matplotlib.pyplot as plt
 class GraphingClient:
 
     def __init__(self):
-
         plt.close("all")
 
-    def graphTickerAndHistory(self, subredditTickerCount, tickerHistory):
+    def graphTickerAndHistory(self, subredditMentions, tickerHistoryForPeriod):
 
         # rolling average
-        tickerHistory['MA50'] = tickerHistory['Close'].rolling(50).mean()
-        tickerHistory[['Close', 'MA50']].plot(label='count', figsize=(16,8), title="Mentions")
+        tickerHistoryForPeriod['MA50'] = tickerHistoryForPeriod['Close'].rolling(50).mean()
+        # close price
+        tickerHistoryForPeriod[['Close', 'MA50']].plot(label='stock', figsize=(16,8), title="Stock Vs Mentions")
+        # mentions
+        subredditMentions.plot(label='mentions')
         plt.legend()
         plt.show()
 
