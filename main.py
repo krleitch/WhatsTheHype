@@ -1,6 +1,6 @@
 import sys, getopt, json
 
-from redditClient import RedditClient
+from redditClient import RedditClient, RedditConfig
 from financeClient import FinanceClient
 from graphingClient import GraphingClient
 
@@ -9,6 +9,7 @@ class WhatsTheHype:
     def __init__(self, argv):
 
         # process args
+        redditConfig: str = None
         try:
             opts, args = getopt.getopt(argv,'hct:s:p:',['config','ticker=','subreddit=','period='])
         except getopt.GetoptError:
@@ -19,7 +20,7 @@ class WhatsTheHype:
                 print('main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all> -c <redditConfigLocation>')
                 sys.exit()
             elif opt in ("-c", "--config"):
-                self.redditConfig = arg
+                redditConfig = arg
             elif opt in ("-t", "--ticker"):
                 self.ticker = arg.lower()
             elif opt in ("-s", "--subreddit"):
@@ -34,8 +35,8 @@ class WhatsTheHype:
         assert(len(self.ticker) <= 5)    
 
         # open config
-        with open(self.redditConfig if self.redditConfig else 'redditConfig.json') as f:
-            rc = json.load(f)
+        with open(redditConfig if redditConfig else 'redditConfig.json') as f:
+            rc: RedditConfig = json.load(f)
 
         # init clients
         self.redditClient = RedditClient(rc)

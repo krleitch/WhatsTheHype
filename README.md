@@ -2,14 +2,14 @@
 
 ### Requirements
 
-python3.X
+python3.9
 
 pip install yfinance, pandas, numpy, matplotlib
 
 #### MAC OS Permission
 
 ```
-cd /Applications/Python\ 3.X/
+cd /Applications/Python\ 3.9/
 ./Install\ Certificates.command
 ```
 
@@ -27,7 +27,7 @@ redditConfig.json
 
 ### Run
 
-python3 main.py -t <ticker> -s <subreddit> -p <period>
+python3 main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all>
 
 -h help
 -t ticker
@@ -36,7 +36,7 @@ python3 main.py -t <ticker> -s <subreddit> -p <period>
 
 example:
 
-python3 main.py 'TSLA' 'wallstreetbets' 'week'
+python3 main.py -t TSLA -s wallstreetbets -p week
 
 This will show how many times TSLA was mentioned on wallstreetbets the past week and compare with the past weeks market data
 mentions include, link submissions, and comments

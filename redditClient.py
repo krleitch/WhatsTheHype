@@ -1,9 +1,20 @@
-import requests
-import json
+import requests, json
+import pandas as pd
+from datetime import datetime, timedelta
+
+# TypedDict requires python 3.8+
+# TODO: make compatible with python 3.7
+from typing import TypedDict
+
+class RedditConfig(TypedDict):
+    username: str
+    password: str
+    clientId: str
+    secret: str
 
 class RedditClient:
 
-    def __init__(self, redditConfig: dict[str, str]) -> None:
+    def __init__(self, redditConfig: RedditConfig) -> None:
 
         # setup basic auth
         auth = requests.auth.HTTPBasicAuth(redditConfig['clientId'], redditConfig['secret'])
@@ -21,9 +32,10 @@ class RedditClient:
 
         # At the time of writing this the pushshift api has aggs parameter disabled
         # If it is ever enabled you can use aggs to get frequency data easier
-        # eg.
+        # example:
         # https://api.pushshift.io/reddit/search/comment/?q=tsla&after=7d&aggs=created_utc&frequency=hour&size=0
 
+        # reddit api example
         # payload = {'q': ticker, 'restrict_sr': 'on'}
         # url = 'https://oauth.reddit.com/r/' + subreddit + '/search.json'
         # test = requests.get(url, params=payload, headers=self.headers)
@@ -33,26 +45,48 @@ class RedditClient:
             # print(i['data']['title'])
 
         a= ''
-        f = ''
         if (period == 'day' ):
             a = '1d'
-            f = 'hour'
         elif (period == 'week'):
             a = '7d'
-            f = 'day'
         elif (period == 'month'):
             a = '30d'
-            f = 'day'
         elif (period == 'year'):
             a = '365d'
-            f = 'day'
         else:
             a = 'all'
-            f = 'day'
 
-        payload = {'q': ticker, 'after': a, 'aggs': 'created_utc', 'frequency': f, 'size': 0, 'subreddit': subreddit}
-        url = 'https://api.pushshift.io/reddit/search/comment/?q=trump&after=7d&aggs=created_utc&frequency=hour&size=0'
-        mentions = requests.get(url)
-        print(mentions.json())
-        print(mentions.json()['data']['aggs']['created_utc'])
-        return mentions.json()['data']['aggs']['created_utc']
+        # make the request for comments of the subreddit mentioning the ticker
+        payload = {'q': ticker, 'after': a, 'subreddit': subreddit}
+        url = 'https://api.pushshift.io/reddit/search/comment/'
+        response = requests.get(url, params=payload)
+        comments = response.json()['data']
+
+        # create date range covering the period
+        endDate = datetime.now()
+        startDate = datetime.now() - timedelta(days=365)
+        str_endDate = endDate.strftime("%Y/%m/%d")
+        str_StartDate = startDate.strftime("%Y/%m/%d")
+        dates = pd.date_range(start=str_StartDate, end=str_endDate, freq='D')
+
+        # initialize mentions to 0
+        mentions = {}
+        for d in dates:
+            str_d = d.strftime("%Y/%m/%d")
+            mentions[str_d] = 0
+
+        # fill in mentions from comments
+        for c in comments:
+            date = datetime.utcfromtimestamp(c['created_utc'])
+            str_date = date.strftime("%Y/%m/%d")
+            if str_date in mentions:
+                mentions[str_date] += 1
+            else:
+                # fix error case
+                print('error - unknown date')
+
+        # create the data frame
+        df = pd.DataFrame.from_dict(mentions, orient='index', columns=['mentions'])
+
+        # return the filled in dataframe
+        return df
