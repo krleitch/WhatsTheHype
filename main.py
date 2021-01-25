@@ -41,7 +41,7 @@ class WhatsTheHype:
         # init clients
         self.redditClient = RedditClient(rc)
         self.financeClient = FinanceClient(self.ticker)
-        self.graphingClient = GraphingClient()
+        self.graphingClient = GraphingClient(self.ticker, self.subreddit)
 
     def main(self):
         subredditMentionsForPeriod = self.redditClient.getSubredditMentionsForPeriod(self.subreddit, self.ticker, self.period)

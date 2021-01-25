@@ -25,6 +25,12 @@ redditConfig.json
 }
 ```
 
+### API Documentation Resources
+
+https://github.com/pushshift/api
+https://github.com/ranaroussi/yfinance
+https://www.reddit.com/dev/api/
+
 ### Run
 
 python3 main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all>
@@ -32,7 +38,7 @@ python3 main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all>
 -h help
 -t ticker
 -s subreddit
--d day/month/year/all
+-p day/month/year/all
 
 example:
 

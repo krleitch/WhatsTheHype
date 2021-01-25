@@ -1,4 +1,4 @@
-import requests, json
+import requests, json, time
 import pandas as pd
 from datetime import datetime, timedelta
 
@@ -35,50 +35,83 @@ class RedditClient:
         # example:
         # https://api.pushshift.io/reddit/search/comment/?q=tsla&after=7d&aggs=created_utc&frequency=hour&size=0
 
-        # reddit api example
-        # payload = {'q': ticker, 'restrict_sr': 'on'}
-        # url = 'https://oauth.reddit.com/r/' + subreddit + '/search.json'
-        # test = requests.get(url, params=payload, headers=self.headers)
-        # return len(test.json()['data']['children'])
-        # gets titles
-        # for i in (test.json()['data']['children']):
-            # print(i['data']['title'])
-
-        a= ''
+        a = ''
+        d = None
         if (period == 'day' ):
             a = '1d'
+            d = 1
         elif (period == 'week'):
             a = '7d'
+            d = 7
         elif (period == 'month'):
             a = '30d'
+            d = 30
         elif (period == 'year'):
             a = '365d'
+            d = 365
         else:
             a = 'all'
-
-        # make the request for comments of the subreddit mentioning the ticker
-        payload = {'q': ticker, 'after': a, 'subreddit': subreddit}
-        url = 'https://api.pushshift.io/reddit/search/comment/'
-        response = requests.get(url, params=payload)
-        comments = response.json()['data']
+            d = 365
 
         # create date range covering the period
         endDate = datetime.now()
-        startDate = datetime.now() - timedelta(days=365)
-        str_endDate = endDate.strftime("%Y/%m/%d")
-        str_StartDate = startDate.strftime("%Y/%m/%d")
+        startDate = datetime.now() - timedelta(days=d)
+        str_endDate = endDate.strftime("%Y-%m-%d")
+        str_StartDate = startDate.strftime("%Y-%m-%d")
         dates = pd.date_range(start=str_StartDate, end=str_endDate, freq='D')
 
         # initialize mentions to 0
         mentions = {}
         for d in dates:
-            str_d = d.strftime("%Y/%m/%d")
+            str_d = d.strftime("%Y-%m-%d")
             mentions[str_d] = 0
+
+        # reddit api links search
+        payload = {'q': ticker, 'restrict_sr': 'on', 't': period, 'limit': 100 }
+        url = 'https://oauth.reddit.com/r/' + subreddit + '/search.json'
+        response = requests.get(url, params=payload, headers=self.headers)
+        after = response.json()['data']['after']
+        links = response.json()['data']['children']
+        
+        # build links by using after
+        while after:
+            response = requests.get(url, params=payload, headers=self.headers)
+            links += response.json()['data']['children']
+            after =  response.json()['data']['after']
+            payload['after'] = after
+
+        # add links to mentions
+        for l in links:
+            date = datetime.utcfromtimestamp(l['data']['created'])
+            str_date = date.strftime("%Y-%m-%d")
+            if str_date in mentions:
+                mentions[str_date] += 1
+            else:
+                # fix error case
+                print('error - unknown date')
+
+        # make the request for comments of the subreddit mentioning the ticker
+        payload = {'q': ticker, 'after': a, 'subreddit': subreddit, 'limit': 500, 'sort': 'desc'}
+        headers = {'User-Agent': 'MyBot/0.0.1'}
+        url = 'https://api.pushshift.io/reddit/search/comment/'
+        response = requests.get(url, params=payload, headers=headers )
+        comments = response.json()['data']
+
+        while len(response.json()['data']) > 0:
+            # TODO: add progress statements
+            before =  response.json()['data'][-1]['created_utc']
+            payload['before'] = before
+            response = requests.get(url, params=payload, headers=headers )
+            while response.status_code == 429:
+                # TODO: use retry-after
+                time.sleep(1)
+                response = requests.get(url, params=payload, headers=headers )
+            comments += response.json()['data']
 
         # fill in mentions from comments
         for c in comments:
             date = datetime.utcfromtimestamp(c['created_utc'])
-            str_date = date.strftime("%Y/%m/%d")
+            str_date = date.strftime("%Y-%m-%d")
             if str_date in mentions:
                 mentions[str_date] += 1
             else:
@@ -86,7 +119,9 @@ class RedditClient:
                 print('error - unknown date')
 
         # create the data frame
-        df = pd.DataFrame.from_dict(mentions, orient='index', columns=['mentions'])
+        df = pd.DataFrame.from_dict(mentions, orient='index', columns=['Mentions'])
+        # convert index from string to datetime
+        df.index = pd.to_datetime(df.index)
 
         # return the filled in dataframe
         return df
