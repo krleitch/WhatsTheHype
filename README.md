@@ -27,9 +27,9 @@ redditConfig.json
 
 ### API Documentation Resources
 
-https://github.com/pushshift/api
-https://github.com/ranaroussi/yfinance
-https://www.reddit.com/dev/api/
+- https://github.com/pushshift/api
+- https://github.com/ranaroussi/yfinance
+- https://www.reddit.com/dev/api/
 
 ### Run
 
@@ -39,10 +39,10 @@ python3 main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all>
 -t ticker
 -s subreddit
 -p day/month/year/all
+-c ./reddit/config/location
 
 example:
 
 python3 main.py -t TSLA -s wallstreetbets -p week
 
-This will show how many times TSLA was mentioned on wallstreetbets the past week and compare with the past weeks market data
-mentions include, link submissions, and comments
+This will show how many times TSLA was mentioned on wallstreetbets (posts and comments) the past week and compare with the past weeks market data

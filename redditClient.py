@@ -87,8 +87,8 @@ class RedditClient:
             if str_date in mentions:
                 mentions[str_date] += 1
             else:
-                # fix error case
-                print('error - unknown date')
+                # TODO: fix error case
+                print('error - unknown link date')
 
         # make the request for comments of the subreddit mentioning the ticker
         payload = {'q': ticker, 'after': a, 'subreddit': subreddit, 'limit': 500, 'sort': 'desc'}
@@ -115,8 +115,8 @@ class RedditClient:
             if str_date in mentions:
                 mentions[str_date] += 1
             else:
-                # fix error case
-                print('error - unknown date')
+                # TODO: fix error case
+                print('error - unknown comment date')
 
         # create the data frame
         df = pd.DataFrame.from_dict(mentions, orient='index', columns=['Mentions'])
