@@ -36,22 +36,23 @@ class RedditClient:
         # https://api.pushshift.io/reddit/search/comment/?q=tsla&after=7d&aggs=created_utc&frequency=hour&size=0
 
         a = ''
+        # d is days backwards, so 0 for 1 day because we dont need any days before
         d = None
         if (period == 'day' ):
             a = '1d'
-            d = 1
+            d = 0
         elif (period == 'week'):
             a = '7d'
-            d = 7
+            d = 6
         elif (period == 'month'):
             a = '30d'
-            d = 30
+            d = 29
         elif (period == 'year'):
             a = '365d'
-            d = 365
+            d = 364
         else:
             a = 'all'
-            d = 365
+            d = 364
 
         # create date range covering the period
         endDate = datetime.now()
@@ -64,7 +65,7 @@ class RedditClient:
         mentions = {}
         for d in dates:
             str_d = d.strftime("%Y-%m-%d")
-            mentions[str_d] = 0
+            mentions[str_d] = [0,0]
 
         # reddit api links search
         payload = {'q': ticker, 'restrict_sr': 'on', 't': period, 'limit': 100 }
@@ -85,7 +86,8 @@ class RedditClient:
             date = datetime.utcfromtimestamp(l['data']['created'])
             str_date = date.strftime("%Y-%m-%d")
             if str_date in mentions:
-                mentions[str_date] += 1
+                mentions[str_date][0] += 1
+                mentions[str_date][1] += l['data']['score']
             else:
                 # TODO: fix error case
                 print('error - unknown link date')
@@ -113,15 +115,17 @@ class RedditClient:
             date = datetime.utcfromtimestamp(c['created_utc'])
             str_date = date.strftime("%Y-%m-%d")
             if str_date in mentions:
-                mentions[str_date] += 1
+                mentions[str_date][0] += 1
+                mentions[str_date][1] += c['score']
             else:
                 # TODO: fix error case
                 print('error - unknown comment date')
 
         # create the data frame
-        df = pd.DataFrame.from_dict(mentions, orient='index', columns=['Mentions'])
+        df = pd.DataFrame.from_dict(mentions, orient='index', columns=['Mentions', 'Score'])
         # convert index from string to datetime
         df.index = pd.to_datetime(df.index)
+        print(df)
 
         # return the filled in dataframe
         return df
