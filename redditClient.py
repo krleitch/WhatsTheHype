@@ -28,44 +28,8 @@ class RedditClient:
         # add auth token to headers
         self.headers = {**headers, **{'Authorization': f"bearer {TOKEN}"}}
 
-    def getSubredditMentionsForPeriod(self, subreddit: str, ticker: str, period: str):
-
-        # At the time of writing this the pushshift api has aggs parameter disabled
-        # If it is ever enabled you can use aggs to get frequency data easier
-        # example:
-        # https://api.pushshift.io/reddit/search/comment/?q=tsla&after=7d&aggs=created_utc&frequency=hour&size=0
-
-        a = ''
-        # d is days backwards, so 0 for 1 day because we dont need any days before
-        d = None
-        if (period == 'day' ):
-            a = '1d'
-            d = 0
-        elif (period == 'week'):
-            a = '7d'
-            d = 6
-        elif (period == 'month'):
-            a = '30d'
-            d = 29
-        elif (period == 'year'):
-            a = '365d'
-            d = 364
-        else:
-            a = 'all'
-            d = 364
-
-        # create date range covering the period
-        endDate = datetime.now()
-        startDate = datetime.now() - timedelta(days=d)
-        str_endDate = endDate.strftime("%Y-%m-%d")
-        str_StartDate = startDate.strftime("%Y-%m-%d")
-        dates = pd.date_range(start=str_StartDate, end=str_endDate, freq='D')
-
-        # initialize mentions to 0
-        mentions = {}
-        for d in dates:
-            str_d = d.strftime("%Y-%m-%d")
-            mentions[str_d] = [0,0]
+    # period: day/week/month/year/all
+    def __getSubredditDataForPostsForPeriod(self, subreddit: str, ticker: str, period: str, mentions):
 
         # reddit api links search
         payload = {'q': ticker, 'restrict_sr': 'on', 't': period, 'limit': 100 }
@@ -77,6 +41,10 @@ class RedditClient:
         # build links by using after
         while after:
             response = requests.get(url, params=payload, headers=self.headers)
+            while response.status_code == 429:
+                # TODO: use retry-after
+                time.sleep(1)
+                response = requests.get(url, params=payload, headers=self.headers )
             links += response.json()['data']['children']
             after =  response.json()['data']['after']
             payload['after'] = after
@@ -92,8 +60,11 @@ class RedditClient:
                 # TODO: fix error case
                 print('error - unknown link date')
 
+    # after: #d or epoch time
+    def __getSubredditDataForCommentsForPeriod(self, subreddit: str, ticker: str, after: str, mentions):
+
         # make the request for comments of the subreddit mentioning the ticker
-        payload = {'q': ticker, 'after': a, 'subreddit': subreddit, 'limit': 500, 'sort': 'desc'}
+        payload = {'q': ticker, 'after': after, 'subreddit': subreddit, 'limit': 500, 'sort': 'desc'}
         headers = {'User-Agent': 'MyBot/0.0.1'}
         url = 'https://api.pushshift.io/reddit/search/comment/'
         response = requests.get(url, params=payload, headers=headers )
@@ -121,8 +92,60 @@ class RedditClient:
                 # TODO: fix error case
                 print('error - unknown comment date')
 
+    # period: day/week/month/year/all
+    # operation: posts/comments/all
+    def getSubredditDataForPeriod(self, subreddit: str, ticker: str, period: str, operation: str):
+
+        # At the time of writing this the pushshift api has aggs parameter disabled
+        # If it is ever enabled you can use aggs to get frequency data easier
+        # example:
+        # https://api.pushshift.io/reddit/search/comment/?q=tsla&after=7d&aggs=created_utc&frequency=hour&size=0
+
+        after = ''
+        # d is days backwards, so 0 for 1 day because we dont need any days before
+        days = None
+        if (period == 'day' ):
+            after = '1d'
+            days = 0
+        elif (period == 'week'):
+            after = '7d'
+            days = 6
+        elif (period == 'month'):
+            after = '30d'
+            days = 29
+        elif (period == 'year'):
+            after = '365d'
+            days = 364
+        else:
+            after = 'all'
+            days = 364
+
+        # create date range covering the period
+        endDate = datetime.now()
+        startDate = datetime.now() - timedelta(days=days)
+        str_endDate = endDate.strftime("%Y-%m-%d")
+        str_StartDate = startDate.strftime("%Y-%m-%d")
+        dates = pd.date_range(start=str_StartDate, end=str_endDate, freq='D')
+
+        # initialize mentions to 0
+        mentions = {}
+        for d in dates:
+            str_d = d.strftime("%Y-%m-%d")
+            mentions[str_d] = [0,0]
+
+        #  fill in mentions with included operations
+        if (operation in ['posts', 'all']):
+            self.__getSubredditDataForPostsForPeriod(subreddit, ticker, period, mentions)
+
+        if (operation in ['comments', 'all']):
+            self.__getSubredditDataForCommentsForPeriod(subreddit, ticker, after, mentions)
+
+        # calculate average score
+        for key in mentions:
+            mentions[key] = [mentions[key][0], mentions[key][1] // mentions[key][0]]
+
         # create the data frame
-        df = pd.DataFrame.from_dict(mentions, orient='index', columns=['Mentions', 'Score'])
+        df = pd.DataFrame.from_dict(mentions, orient='index', columns=['Mentions', 'Avg Score'])
         # convert index from string to datetime
         df.index = pd.to_datetime(df.index)
         print(df)

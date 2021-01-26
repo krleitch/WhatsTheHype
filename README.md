@@ -33,23 +33,29 @@ redditConfig.json
 
 ### Run
 
-python3 main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all>
+python3 main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all> -o <posts/comments/all>
 
 - -h (help)
 - -t ticker
 - -s subreddit
 - -p day/month/year/all
 - -c ./reddit/config/location
+- -o posts/comments/all
 
 example:
 
-python3 main.py -t TSLA -s wallstreetbets -p week
+python3 main.py -t TSLA -s wallstreetbets -p week -o all
 
 This will show how many times TSLA was mentioned on wallstreetbets (posts and comments) the past week and compare with the past weeks market data
 
 ### Examples
 
 TODO
+
+### Issues
+
+- The charts are only as good as the data we have available. 
+- Sometimes the pushshift comments for the current day are not all available
 
 ### TODO
 
