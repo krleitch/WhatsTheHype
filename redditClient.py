@@ -14,7 +14,7 @@ class RedditConfig(TypedDict):
 
 class RedditClient:
 
-    def __init__(self, redditConfig: RedditConfig) -> None:
+    def __init__(self, redditConfig: RedditConfig, verbose: bool) -> None:
 
         # setup basic auth
         auth = requests.auth.HTTPBasicAuth(redditConfig['clientId'], redditConfig['secret'])
@@ -27,6 +27,7 @@ class RedditClient:
 
         # add auth token to headers
         self.headers = {**headers, **{'Authorization': f"bearer {TOKEN}"}}
+        self.verbose = verbose
 
     # period: day/week/month/year/all
     def __getSubredditDataForPostsForPeriod(self, subreddit: str, ticker: str, period: str, mentions):
@@ -38,7 +39,6 @@ class RedditClient:
         after = response.json()['data']['after']
         links = response.json()['data']['children']
         totalReceived = len(links)
-        print(totalReceived)
         print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
         
         # build links by using after
@@ -54,7 +54,8 @@ class RedditClient:
             print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
             after =  response.json()['data']['after']
             payload['after'] = after
-
+        
+        totalUsed = 0
         # add links to mentions
         for l in links:
             date = datetime.utcfromtimestamp(l['data']['created'])
@@ -63,8 +64,12 @@ class RedditClient:
             #  TODO: we still get the current day and this filters it out
             #        should change so that never get invalid dates here
             if str_date in mentions:
+                totalUsed += 1
                 mentions[str_date][0] += 1
                 mentions[str_date][1] += l['data']['score']
+
+        if (self.verbose):
+            print(str(totalUsed) + ' total posts aggregated')
 
     # after: #d or epoch time
     def __getSubredditDataForCommentsForPeriod(self, subreddit: str, ticker: str, after: str, mentions):
@@ -91,14 +96,19 @@ class RedditClient:
             totalReceived = len(comments)
             print(str(totalReceived) + ' Comments Fetched', end="\r", flush=True)
 
+        totalUsed = 0
         # fill in mentions from comments
         for c in comments:
             date = datetime.utcfromtimestamp(c['created_utc'])
             str_date = date.strftime("%Y-%m-%d")
             # only take dates we care about
             if str_date in mentions:
+                totalUsed += 1
                 mentions[str_date][0] += 1
                 mentions[str_date][1] += c['score']
+
+        if (self.verbose):
+            print(str(totalUsed) + ' total comments aggregated')
 
     # period: day/week/month/year/all
     # operation: posts/comments/all

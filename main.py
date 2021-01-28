@@ -53,7 +53,7 @@ class WhatsTheHype:
             rc: RedditConfig = json.load(f)
 
         # init clients
-        self.redditClient = RedditClient(rc)
+        self.redditClient = RedditClient(rc, self.verbose)
         self.financeClient = FinanceClient(self.ticker)
         self.graphingClient = GraphingClient(self.ticker, self.subreddit)
 

@@ -27,17 +27,17 @@ class GraphingClient:
 
         # we only have a single data point
         if (len(subredditDataForPeriod.index) == 1):
-            # plot prices
-            tickerHistoryForPeriod[['Close', 'MA50']].plot(ax=self.axes[0], style='rx')
             # plot mentions
             subredditDataForPeriod['Mentions'].plot(ax=self.axes[1], style='bx')
+            # plot prices
+            tickerHistoryForPeriod[['Close', 'MA50']].plot(ax=self.axes[0], style='rx')
             # plot score
             subredditDataForPeriod['Avg Score'].plot(ax=self.axes[2], style='gx')
         else:
-            # plot prices
-            tickerHistoryForPeriod[['Close', 'MA50']].plot(ax=self.axes[0], style='r-')
             # plot mentions
             subredditDataForPeriod['Mentions'].plot(ax=self.axes[1], style='b-')
+            # plot prices
+            tickerHistoryForPeriod[['Close', 'MA50']].plot(ax=self.axes[0], style='r-')
             # plot score
             subredditDataForPeriod['Avg Score'].plot(ax=self.axes[2], style='g-')   
 
