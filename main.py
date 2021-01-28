@@ -11,13 +11,13 @@ class WhatsTheHype:
         # process args
         redditConfig: str = None
         try:
-            opts, args = getopt.getopt(argv,'hct:s:p:o',['help','config','ticker=','subreddit=','period=','operation'])
+            opts, args = getopt.getopt(argv,'hct:s:p:o:v',['help','config','ticker=','subreddit=','period=','operation=','verbose'])
         except getopt.GetoptError:
-            print('main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all> -c <redditConfigLocation> -o <posts/comments/all>')
+            print('main.py -t <ticker> -s <subreddit> -p <day/week/month/quarter/half/year/all> -c <redditConfigLocation> -o <posts/comments/all> - v')
             sys.exit(2)
         for opt, arg in opts:
             if opt in ('-h',  '--help'):
-                print('main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all> -c <redditConfigLocation> -o <posts/comments/all>')
+                print('main.py -t <ticker> -s <subreddit> -p <day/week/month/quarter/half/year/all> -c <redditConfigLocation> -o <posts/comments/all> -v')
                 sys.exit()
             elif opt in ('-c', '--config'):
                 redditConfig = arg
@@ -29,6 +29,8 @@ class WhatsTheHype:
                 self.period = arg.lower()
             elif opt in ('-o', '--operation'):
                 self.operation = arg.lower()
+            elif opt in ('-v', '--verbose'):
+                self.verbose = True
 
         # check period one of day/week/month/year/all
         assert(self.period in ['day', 'week', 'month', 'year', 'all'])
@@ -39,8 +41,12 @@ class WhatsTheHype:
         # check operation is valid, or set operation to default
         try:
             assert(self.operation in ['posts', 'comments', 'all'])
-        except AttributeError:
+        except AssertionError:
             self.operation = 'all'
+
+        # Set verbose
+        if (not hasattr(self, 'verbose')):
+            self.verbose = False
         
         # open reddit config
         with open(redditConfig if redditConfig else 'redditConfig.json') as f:
@@ -54,6 +60,12 @@ class WhatsTheHype:
     def main(self):
         subredditDataForPeriod = self.redditClient.getSubredditDataForPeriod(self.subreddit, self.ticker, self.period, self.operation)
         tickerHistoryForPeriod = self.financeClient.getTickerHistoryForPeriod(self.period)
+
+        # print statements
+        if (self.verbose):
+            print(subredditDataForPeriod)
+            print(tickerHistoryForPeriod)
+
         self.graphingClient.graphTickerAndSubredditData(subredditDataForPeriod, tickerHistoryForPeriod)
 
 if __name__ == "__main__":

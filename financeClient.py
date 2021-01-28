@@ -13,6 +13,10 @@ class FinanceClient:
             return self.tickerData.history(period="7d")
         elif (period == 'month'):
             return self.tickerData.history(period="1mo")
+        elif (period == 'quarter'):
+            return self.tickerData.history(period="3mo")
+        elif (period == 'half'):
+            return self.tickerData.history(period="6mo")
         elif (period == 'year'):
             return self.tickerData.history(period="1y")
         else:

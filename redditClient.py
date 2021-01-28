@@ -37,15 +37,21 @@ class RedditClient:
         response = requests.get(url, params=payload, headers=self.headers)
         after = response.json()['data']['after']
         links = response.json()['data']['children']
+        totalReceived = len(links)
+        print(totalReceived)
+        print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
         
         # build links by using after
         while after:
             response = requests.get(url, params=payload, headers=self.headers)
             while response.status_code == 429:
-                # TODO: use retry-after
+                # TODO: there is no retry-after header right now
+                # time.sleep(int(response.headers["Retry-After"]))
                 time.sleep(1)
                 response = requests.get(url, params=payload, headers=self.headers )
             links += response.json()['data']['children']
+            totalReceived = len(links)
+            print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
             after =  response.json()['data']['after']
             payload['after'] = after
 
@@ -53,12 +59,12 @@ class RedditClient:
         for l in links:
             date = datetime.utcfromtimestamp(l['data']['created'])
             str_date = date.strftime("%Y-%m-%d")
+            #  only take dates we care about
+            #  TODO: we still get the current day and this filters it out
+            #        should change so that never get invalid dates here
             if str_date in mentions:
                 mentions[str_date][0] += 1
                 mentions[str_date][1] += l['data']['score']
-            else:
-                # TODO: fix error case
-                print('error - unknown link date')
 
     # after: #d or epoch time
     def __getSubredditDataForCommentsForPeriod(self, subreddit: str, ticker: str, after: str, mentions):
@@ -69,28 +75,30 @@ class RedditClient:
         url = 'https://api.pushshift.io/reddit/search/comment/'
         response = requests.get(url, params=payload, headers=headers )
         comments = response.json()['data']
+        totalReceived = len(comments)
+        print(str(totalReceived) + ' Comments Fetched', end="\r", flush=True)
 
         while len(response.json()['data']) > 0:
-            # TODO: add progress statements
             before =  response.json()['data'][-1]['created_utc']
             payload['before'] = before
             response = requests.get(url, params=payload, headers=headers )
             while response.status_code == 429:
-                # TODO: use retry-after
+                # TODO: there is no retry-after header right now
+                # time.sleep(int(response.headers["Retry-After"]))
                 time.sleep(1)
                 response = requests.get(url, params=payload, headers=headers )
             comments += response.json()['data']
+            totalReceived = len(comments)
+            print(str(totalReceived) + ' Comments Fetched', end="\r", flush=True)
 
         # fill in mentions from comments
         for c in comments:
             date = datetime.utcfromtimestamp(c['created_utc'])
             str_date = date.strftime("%Y-%m-%d")
+            # only take dates we care about
             if str_date in mentions:
                 mentions[str_date][0] += 1
                 mentions[str_date][1] += c['score']
-            else:
-                # TODO: fix error case
-                print('error - unknown comment date')
 
     # period: day/week/month/year/all
     # operation: posts/comments/all
@@ -101,27 +109,31 @@ class RedditClient:
         # example:
         # https://api.pushshift.io/reddit/search/comment/?q=tsla&after=7d&aggs=created_utc&frequency=hour&size=0
 
-        after = ''
-        # d is days backwards, so 0 for 1 day because we dont need any days before
+        # get parameters from period
+        after = None
         days = None
-        if (period == 'day' ):
+        if (period == 'day'):
             after = '1d'
-            days = 0
+            days = 1
         elif (period == 'week'):
             after = '7d'
-            days = 6
+            days = 7
         elif (period == 'month'):
             after = '30d'
-            days = 29
+            days = 30
+        elif (period == 'quarter'):
+            after = '91d'
+            days = 91
+        elif (period == 'half'):
+            after = '182d'
+            days = 182
         elif (period == 'year'):
             after = '365d'
-            days = 364
-        else:
-            after = 'all'
-            days = 364
+            days = 365
 
         # create date range covering the period
-        endDate = datetime.now()
+        # starts from 1 day ago, since we dont get data for current day all the time
+        endDate = datetime.now() - timedelta(days=1)
         startDate = datetime.now() - timedelta(days=days)
         str_endDate = endDate.strftime("%Y-%m-%d")
         str_StartDate = startDate.strftime("%Y-%m-%d")
@@ -148,7 +160,6 @@ class RedditClient:
         df = pd.DataFrame.from_dict(mentions, orient='index', columns=['Mentions', 'Avg Score'])
         # convert index from string to datetime
         df.index = pd.to_datetime(df.index)
-        print(df)
 
         # return the filled in dataframe
         return df

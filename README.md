@@ -33,14 +33,15 @@ redditConfig.json
 
 ### Run
 
-python3 main.py -t <ticker> -s <subreddit> -p <day/week/month/year/all> -o <posts/comments/all>
+python3 main.py -t <ticker> -s <subreddit> -p <day/week/month/quarter/half/year> -o <posts/comments/all>
 
 - -h (help)
 - -t ticker
 - -s subreddit
-- -p day/month/year/all
+- -p day/week/month/year
 - -c ./reddit/config/location
 - -o posts/comments/all
+- -v (verbose) prints dataframe info
 
 example:
 
