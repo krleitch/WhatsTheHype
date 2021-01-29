@@ -39,7 +39,8 @@ class RedditClient:
         after = response.json()['data']['after']
         links = response.json()['data']['children']
         totalReceived = len(links)
-        print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
+        if (self.verbose):
+            print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
         
         # build links by using after
         while after:
@@ -51,7 +52,8 @@ class RedditClient:
                 response = requests.get(url, params=payload, headers=self.headers )
             links += response.json()['data']['children']
             totalReceived = len(links)
-            print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
+            if (self.verbose):
+                print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
             after =  response.json()['data']['after']
             payload['after'] = after
         
@@ -69,7 +71,7 @@ class RedditClient:
                 mentions[str_date][1] += l['data']['score']
 
         if (self.verbose):
-            print(str(totalUsed) + ' total posts aggregated')
+            print(str(totalUsed) + '/' + str(totalReceived) + ' total posts aggregated')
 
     # after: #d or epoch time
     def __getSubredditDataForCommentsForPeriod(self, subreddit: str, ticker: str, after: str, mentions):
@@ -81,7 +83,8 @@ class RedditClient:
         response = requests.get(url, params=payload, headers=headers )
         comments = response.json()['data']
         totalReceived = len(comments)
-        print(str(totalReceived) + ' Comments Fetched', end="\r", flush=True)
+        if (self.verbose):
+            print(str(totalReceived) + ' Comments Fetched', end="\r", flush=True)
 
         while len(response.json()['data']) > 0:
             before =  response.json()['data'][-1]['created_utc']
@@ -94,7 +97,8 @@ class RedditClient:
                 response = requests.get(url, params=payload, headers=headers )
             comments += response.json()['data']
             totalReceived = len(comments)
-            print(str(totalReceived) + ' Comments Fetched', end="\r", flush=True)
+            if (self.verbose):
+                print(str(totalReceived) + ' Comments Fetched', end="\r", flush=True)
 
         totalUsed = 0
         # fill in mentions from comments
@@ -108,7 +112,7 @@ class RedditClient:
                 mentions[str_date][1] += c['score']
 
         if (self.verbose):
-            print(str(totalUsed) + ' total comments aggregated')
+            print(str(totalUsed) + '/' + str(totalReceived) + ' total comments aggregated')
 
     # period: day/week/month/year/all
     # operation: posts/comments/all
@@ -164,7 +168,8 @@ class RedditClient:
 
         # calculate average score
         for key in mentions:
-            mentions[key] = [mentions[key][0], mentions[key][1] // mentions[key][0]]
+            if ( not mentions[key][0] == 0 ):
+                mentions[key] = [mentions[key][0], mentions[key][1] // mentions[key][0]]
 
         # create the data frame
         df = pd.DataFrame.from_dict(mentions, orient='index', columns=['Mentions', 'Avg Score'])

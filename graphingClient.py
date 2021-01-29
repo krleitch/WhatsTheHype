@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 class GraphingClient:
 
@@ -18,7 +19,10 @@ class GraphingClient:
         self.axes[1].set_xlabel('Date')
         self.axes[2].set_xlabel('Date')
         # title
-        plt.suptitle(ticker.upper() + ' Vs r/' + subreddit + ' Mentions Vs Average Score')
+        now = datetime.now()
+        # dd/mm/YY H:M:S
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        plt.suptitle(ticker.upper() + ' Vs r/' + subreddit + ' Mentions Vs Average Score On ' + dt_string)
 
     def graphTickerAndSubredditData(self, subredditDataForPeriod, tickerHistoryForPeriod):
 
@@ -44,5 +48,5 @@ class GraphingClient:
         plt.legend()
         plt.show()
 
-        # TODO: save graph
+        # TODO: allow option to save graph
         #df.to_csv("foo.csv")

@@ -49,6 +49,9 @@ python3 main.py -t TSLA -s wallstreetbets -p week -o all
 
 This will show how many times TSLA was mentioned on wallstreetbets (posts and comments) the past week and compare with the past weeks market data
 
+- Since we can only get 100 comments at a time, searches with a bigger period will take a long time
+- Use -v to see progress statements
+
 ### Examples
 
 TODO
@@ -64,3 +67,7 @@ TODO
 - I would like to expand this into the ability to discover new tickers that are trending upwards in mentions
 - Comparing with market past market data it could be an interesting take on what makes market buzz
 - Can also compare different subreddits and see which ones catch on faster
+
+- Rights now comments vastly overpower posts, making the 'all' operation too similar to comments
+- A possible soluution is weighing scores more, limited mentions to a link_id...
+- Likewise, Average Score means less for comments, when there is a lot... need a better measure

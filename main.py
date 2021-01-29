@@ -9,7 +9,6 @@ class WhatsTheHype:
     def __init__(self, argv):
 
         # process args
-        redditConfig: str = None
         try:
             opts, args = getopt.getopt(argv,'hct:s:p:o:v',['help','config','ticker=','subreddit=','period=','operation=','verbose'])
         except getopt.GetoptError:
@@ -20,7 +19,7 @@ class WhatsTheHype:
                 print('main.py -t <ticker> -s <subreddit> -p <day/week/month/quarter/half/year/all> -c <redditConfigLocation> -o <posts/comments/all> -v')
                 sys.exit()
             elif opt in ('-c', '--config'):
-                redditConfig = arg
+                self.redditConfig = arg
             elif opt in ('-t', '--ticker'):
                 self.ticker = arg.lower()
             elif opt in ('-s', '--subreddit'):
@@ -32,24 +31,34 @@ class WhatsTheHype:
             elif opt in ('-v', '--verbose'):
                 self.verbose = True
 
-        # check period one of day/week/month/year/all
-        assert(self.period in ['day', 'week', 'month', 'year', 'all'])
+        # check period is valid
+        try:
+            assert(self.period in ['day', 'week', 'month', 'quarter', 'half', 'year'])
+        except AssertionError:
+            print('Period must be one of day/week/month/quarter/half/year')
 
         # all tickers are less than 5
-        assert(len(self.ticker) <= 5)    
-
+        try:
+            assert(len(self.ticker) <= 5)   
+        except AssertionError:
+            print('Invalid Ticker')
+         
         # check operation is valid, or set operation to default
         try:
-            assert(self.operation in ['posts', 'comments', 'all'])
+            if ( not hasattr(self, 'operation') ):
+                self.operation = 'all'
+            else:
+                assert(self.operation in ['posts', 'comments', 'all'])
         except AssertionError:
-            self.operation = 'all'
+            print('Operation must be of of posts/comments/all')
 
-        # Set verbose
+        # Set verbose if not supplied
         if (not hasattr(self, 'verbose')):
             self.verbose = False
         
         # open reddit config
-        with open(redditConfig if redditConfig else 'redditConfig.json') as f:
+        defaultConfigLocation = 'redditConfig.json'
+        with open(self.redditConfig if hasattr(self, 'redditConfig') else defaultConfigLocation) as f:
             rc: RedditConfig = json.load(f)
 
         # init clients
@@ -58,6 +67,8 @@ class WhatsTheHype:
         self.graphingClient = GraphingClient(self.ticker, self.subreddit)
 
     def main(self):
+
+        # get data frames
         subredditDataForPeriod = self.redditClient.getSubredditDataForPeriod(self.subreddit, self.ticker, self.period, self.operation)
         tickerHistoryForPeriod = self.financeClient.getTickerHistoryForPeriod(self.period)
 
@@ -66,8 +77,11 @@ class WhatsTheHype:
             print(subredditDataForPeriod)
             print(tickerHistoryForPeriod)
 
+        # graph data frames
         self.graphingClient.graphTickerAndSubredditData(subredditDataForPeriod, tickerHistoryForPeriod)
 
 if __name__ == "__main__":
+
+    # process args and run the program
     wth = WhatsTheHype(sys.argv[1:])
     wth.main()
