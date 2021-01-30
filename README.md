@@ -64,7 +64,7 @@ This will show how many times TSLA was mentioned on wallstreetbets (links and co
 
 It is important not to read too much into any of the data at this point, but here are some interesting findings
 
-parameters: -t gme -p biweek -o links
+parameters: -t gme -s wallstreetbets -p biweek -o links
 
 ![Image of gme-biweek-links](https://github.com/krleitch/WhatsTheHype/blob/main/examples/gme-biweek-links.png)
 
