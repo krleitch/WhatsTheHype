@@ -22,7 +22,7 @@ class GraphingClient:
         now = datetime.now()
         # dd/mm/YY H:M:S
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-        op_string = 'comments and posts' if operation == 'all' else operation
+        op_string = 'comments and links' if operation == 'all' else operation
         title = f'{ticker.upper()} on r/{subreddit} ({op_string}). Current Time: {dt_string}'
         plt.suptitle(title)
         # subplot titles

@@ -12,11 +12,11 @@ class WhatsTheHype:
         try:
             opts, args = getopt.getopt(argv,'hct:s:p:o:v',['help','config','ticker=','subreddit=','period=','operation=','verbose'])
         except getopt.GetoptError:
-            print('main.py -t <ticker> -s <subreddit> -p <day/week/biweek/month/quarter/half/year> -c <redditConfigLocation> -o <posts/comments/all> - v')
+            print('main.py -t <ticker> -s <subreddit> -p <day/week/biweek/month/quarter/half/year> -c <redditConfigLocation> -o <links/comments/all> - v')
             sys.exit(2)
         for opt, arg in opts:
             if opt in ('-h',  '--help'):
-                print('main.py -t <ticker> -s <subreddit> -p <day/week/biweek/month/quarter/half/year> -c <redditConfigLocation> -o <posts/comments/all> -v')
+                print('main.py -t <ticker> -s <subreddit> -p <day/week/biweek/month/quarter/half/year> -c <redditConfigLocation> -o <links/comments/all> -v')
                 sys.exit()
             elif opt in ('-c', '--config'):
                 self.redditConfig = arg
@@ -48,9 +48,9 @@ class WhatsTheHype:
             if ( not hasattr(self, 'operation') ):
                 self.operation = 'all'
             else:
-                assert(self.operation in ['posts', 'comments', 'all'])
+                assert(self.operation in ['links', 'comments', 'all'])
         except AssertionError:
-            print('Operation must be of of posts/comments/all')
+            print('Operation must be of of links/comments/all')
 
         # Set verbose if not supplied
         if (not hasattr(self, 'verbose')):

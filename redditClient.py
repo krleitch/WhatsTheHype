@@ -30,7 +30,7 @@ class RedditClient:
         self.verbose = verbose
 
     # period: day/week/month/year/all
-    def __getSubredditDataForPostsForPeriod(self, subreddit: str, ticker: str, period: str, mentions):
+    def __getSubredditDataForLinksForPeriod(self, subreddit: str, ticker: str, period: str, mentions):
 
         # reddit api links search
         payload = {'q': ticker, 'restrict_sr': 'on', 't': period, 'limit': 100 }
@@ -40,7 +40,7 @@ class RedditClient:
         links = response.json()['data']['children']
         totalReceived = len(links)
         if (self.verbose):
-            print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
+            print(str(totalReceived) + ' Links Fetched', end="\r", flush=True)
         
         # build links by using after
         while after:
@@ -53,7 +53,7 @@ class RedditClient:
             links += response.json()['data']['children']
             totalReceived = len(links)
             if (self.verbose):
-                print(str(totalReceived) + ' Posts Fetched', end="\r", flush=True)
+                print(str(totalReceived) + ' Links Fetched', end="\r", flush=True)
             after =  response.json()['data']['after']
             payload['after'] = after
         
@@ -71,7 +71,7 @@ class RedditClient:
                 mentions[str_date][1] += l['data']['score']
 
         if (self.verbose):
-            print(str(totalUsed) + '/' + str(totalReceived) + ' total posts aggregated')
+            print(str(totalUsed) + '/' + str(totalReceived) + ' total links aggregated')
 
     # after: #d or epoch time
     def __getSubredditDataForCommentsForPeriod(self, subreddit: str, ticker: str, after: str, mentions):
@@ -115,7 +115,7 @@ class RedditClient:
             print(str(totalUsed) + '/' + str(totalReceived) + ' total comments aggregated')
 
     # period: day/week/biweek/month/quarter/half/year
-    # operation: posts/comments/all
+    # operation: links/comments/all
     def getSubredditDataForPeriod(self, subreddit: str, ticker: str, period: str, operation: str):
 
         # At the time of writing this the pushshift api has aggs parameter disabled
@@ -163,8 +163,8 @@ class RedditClient:
             mentions[str_d] = [0,0]
 
         #  fill in mentions with included operations
-        if (operation in ['posts', 'all']):
-            self.__getSubredditDataForPostsForPeriod(subreddit, ticker, period, mentions)
+        if (operation in ['links', 'all']):
+            self.__getSubredditDataForLinksForPeriod(subreddit, ticker, period, mentions)
 
         if (operation in ['comments', 'all']):
             self.__getSubredditDataForCommentsForPeriod(subreddit, ticker, after, mentions)
