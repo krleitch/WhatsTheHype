@@ -23,7 +23,7 @@ cd /Applications/Python\ 3.9/
 ### Create Reddit Config
 
 - Place redditConfig.json in main folder
-- you can also you -c to specify anotherr config location
+- you can also use -c to specify another config location
 
 redditConfig.json
 ```
