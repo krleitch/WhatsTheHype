@@ -12,11 +12,11 @@ class WhatsTheHype:
         try:
             opts, args = getopt.getopt(argv,'hct:s:p:o:v',['help','config','ticker=','subreddit=','period=','operation=','verbose'])
         except getopt.GetoptError:
-            print('main.py -t <ticker> -s <subreddit> -p <day/week/month/quarter/half/year> -c <redditConfigLocation> -o <posts/comments/all> - v')
+            print('main.py -t <ticker> -s <subreddit> -p <day/week/biweek/month/quarter/half/year> -c <redditConfigLocation> -o <posts/comments/all> - v')
             sys.exit(2)
         for opt, arg in opts:
             if opt in ('-h',  '--help'):
-                print('main.py -t <ticker> -s <subreddit> -p <day/week/month/quarter/half/year> -c <redditConfigLocation> -o <posts/comments/all> -v')
+                print('main.py -t <ticker> -s <subreddit> -p <day/week/biweek/month/quarter/half/year> -c <redditConfigLocation> -o <posts/comments/all> -v')
                 sys.exit()
             elif opt in ('-c', '--config'):
                 self.redditConfig = arg
@@ -33,7 +33,7 @@ class WhatsTheHype:
 
         # check period is valid
         try:
-            assert(self.period in ['day', 'week', 'month', 'quarter', 'half', 'year'])
+            assert(self.period in ['day', 'week', 'biweek', 'month', 'quarter', 'half', 'year'])
         except AssertionError:
             print('Period must be one of day/week/month/quarter/half/year')
 

@@ -11,6 +11,8 @@ class FinanceClient:
             return self.tickerData.history(period="1d")
         elif (period == 'week'):
             return self.tickerData.history(period="7d")
+        elif (period == 'biweek'):
+            return self.tickerData.history(period="14d")
         elif (period == 'month'):
             return self.tickerData.history(period="1mo")
         elif (period == 'quarter'):

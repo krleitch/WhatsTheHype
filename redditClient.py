@@ -114,7 +114,7 @@ class RedditClient:
         if (self.verbose):
             print(str(totalUsed) + '/' + str(totalReceived) + ' total comments aggregated')
 
-    # period: day/week/month/year/all
+    # period: day/week/biweek/month/quarter/half/year
     # operation: posts/comments/all
     def getSubredditDataForPeriod(self, subreddit: str, ticker: str, period: str, operation: str):
 
@@ -132,6 +132,9 @@ class RedditClient:
         elif (period == 'week'):
             after = '7d'
             days = 7
+        elif (period == 'biweek'):
+            after = '14d'
+            days = 14
         elif (period == 'month'):
             after = '30d'
             days = 30
