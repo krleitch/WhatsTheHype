@@ -10,13 +10,13 @@ class WhatsTheHype:
 
         # process args
         try:
-            opts, args = getopt.getopt(argv,'hct:s:p:o:v',['help','config','ticker=','subreddit=','period=','operation=','verbose'])
+            opts, args = getopt.getopt(argv,'hct:s:b:a:o:v',['help','config','ticker=','subreddit=','before=','after=','operation=','verbose'])
         except getopt.GetoptError:
-            print('main.py -t <ticker> -s <subreddit> -p <day/week/biweek/month/quarter/half/year> -c <redditConfigLocation> -o <links/comments/all> - v')
+            print('main.py -t <ticker> -s <subreddit> -b # -a #-c <redditConfigLocation> -o <links/comments/all> - v')
             sys.exit(2)
         for opt, arg in opts:
             if opt in ('-h',  '--help'):
-                print('main.py -t <ticker> -s <subreddit> -p <day/week/biweek/month/quarter/half/year> -c <redditConfigLocation> -o <links/comments/all> -v')
+                print('main.py -t <ticker> -s <subreddit> -b # -a # -c <redditConfigLocation> -o <links/comments/all> -v')
                 sys.exit()
             elif opt in ('-c', '--config'):
                 self.redditConfig = arg
@@ -24,8 +24,10 @@ class WhatsTheHype:
                 self.ticker = arg.lower()
             elif opt in ('-s', '--subreddit'):
                 self.subreddit = arg.lower()
-            elif opt in ('-p', '--period'):
-                self.period = arg.lower()
+            elif opt in ('-b', '--before'):
+                self.before = int(arg)
+            elif opt in ('-a', '--after'):
+                self.after = int(arg)
             elif opt in ('-o', '--operation'):
                 self.operation = arg.lower()
             elif opt in ('-v', '--verbose'):
@@ -33,9 +35,12 @@ class WhatsTheHype:
 
         # check period is valid
         try:
-            assert(self.period in ['day', 'week', 'biweek', 'month', 'quarter', 'half', 'year'])
+            assert(self.before > 0)
+            assert(self.after > 0)
+            assert(self.before < self.after)
         except AssertionError:
-            print('Period must be one of day/week/month/quarter/half/year')
+            # TODO: Make this give more info for which assert
+            print('Invalid Before and After')
 
         # all tickers are less than 5
         try:
@@ -69,8 +74,8 @@ class WhatsTheHype:
     def main(self):
 
         # get data frames
-        subredditDataForPeriod = self.redditClient.getSubredditDataForPeriod(self.subreddit, self.ticker, self.period, self.operation)
-        tickerHistoryForPeriod = self.financeClient.getTickerHistoryForPeriod(self.period)
+        subredditDataForPeriod = self.redditClient.getSubredditDataForPeriod(self.subreddit, self.ticker, self.before, self.after, self.operation)
+        tickerHistoryForPeriod = self.financeClient.getTickerHistoryForPeriod(self.before, self.after)
 
         # print statements
         if (self.verbose):

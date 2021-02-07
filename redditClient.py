@@ -29,11 +29,25 @@ class RedditClient:
         self.headers = {**headers, **{'Authorization': f"bearer {TOKEN}"}}
         self.verbose = verbose
 
-    # period: day/week/month/year/all
-    def __getSubredditDataForLinksForPeriod(self, subreddit: str, ticker: str, period: str, mentions):
+    # before: #
+    # after: #
+    def __getSubredditDataForLinksForPeriod(self, subreddit: str, ticker: str, before: int, after: int, mentions):
+
+        t = None
+        period = after-before
+        if ( period <= 1 ):
+            t = 'day'
+        elif ( period <= 7 ):
+            t = 'week'
+        elif ( period <= 30 ):
+            t = 'month'
+        elif ( period <= 365 ):
+            t = 'week'
+        else:
+            t = 'all'
 
         # reddit api links search
-        payload = {'q': ticker, 'restrict_sr': 'on', 't': period, 'limit': 100 }
+        payload = {'q': ticker, 'restrict_sr': 'on', 't': t, 'limit': 100 }
         url = 'https://oauth.reddit.com/r/' + subreddit + '/search.json'
         response = requests.get(url, params=payload, headers=self.headers)
         after = response.json()['data']['after']
@@ -74,10 +88,12 @@ class RedditClient:
             print(str(totalUsed) + '/' + str(totalReceived) + ' total links aggregated')
 
     # after: #d or epoch time
-    def __getSubredditDataForCommentsForPeriod(self, subreddit: str, ticker: str, after: str, mentions):
+    def __getSubredditDataForCommentsForPeriod(self, subreddit: str, ticker: str, after: int, mentions):
+
+        str_after = str(after) + 'd'
 
         # make the request for comments of the subreddit mentioning the ticker
-        payload = {'q': ticker, 'after': after, 'subreddit': subreddit, 'limit': 500, 'sort': 'desc'}
+        payload = {'q': ticker, 'after': str_after, 'subreddit': subreddit, 'limit': 500, 'sort': 'desc'}
         headers = {'User-Agent': 'MyBot/0.0.1'}
         url = 'https://api.pushshift.io/reddit/search/comment/'
         response = requests.get(url, params=payload, headers=headers )
@@ -114,44 +130,19 @@ class RedditClient:
         if (self.verbose):
             print(str(totalUsed) + '/' + str(totalReceived) + ' total comments aggregated')
 
-    # period: day/week/biweek/month/quarter/half/year
+    # after: #
     # operation: links/comments/all
-    def getSubredditDataForPeriod(self, subreddit: str, ticker: str, period: str, operation: str):
+    def getSubredditDataForPeriod(self, subreddit: str, ticker: str, before: int, after: int, operation: str):
 
         # At the time of writing this the pushshift api has aggs parameter disabled
         # If it is ever enabled you can use aggs to get frequency data easier
         # example:
         # https://api.pushshift.io/reddit/search/comment/?q=tsla&after=7d&aggs=created_utc&frequency=hour&size=0
 
-        # get parameters from period
-        after = None
-        days = None
-        if (period == 'day'):
-            after = '1d'
-            days = 1
-        elif (period == 'week'):
-            after = '7d'
-            days = 7
-        elif (period == 'biweek'):
-            after = '14d'
-            days = 14
-        elif (period == 'month'):
-            after = '30d'
-            days = 30
-        elif (period == 'quarter'):
-            after = '91d'
-            days = 91
-        elif (period == 'half'):
-            after = '182d'
-            days = 182
-        elif (period == 'year'):
-            after = '365d'
-            days = 365
-
-        # create date range covering the period
+        # create date range covering the period ( after-before )
         # starts from 1 day ago, since we dont get data for current day all the time
-        endDate = datetime.now() - timedelta(days=1)
-        startDate = datetime.now() - timedelta(days=days)
+        endDate = datetime.now() - timedelta(days=before)
+        startDate = datetime.now() - timedelta(days=after)
         str_endDate = endDate.strftime("%Y-%m-%d")
         str_StartDate = startDate.strftime("%Y-%m-%d")
         dates = pd.date_range(start=str_StartDate, end=str_endDate, freq='D')
@@ -164,7 +155,7 @@ class RedditClient:
 
         #  fill in mentions with included operations
         if (operation in ['links', 'all']):
-            self.__getSubredditDataForLinksForPeriod(subreddit, ticker, period, mentions)
+            self.__getSubredditDataForLinksForPeriod(subreddit, ticker, before, after, mentions)
 
         if (operation in ['comments', 'all']):
             self.__getSubredditDataForCommentsForPeriod(subreddit, ticker, after, mentions)

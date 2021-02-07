@@ -37,7 +37,7 @@ redditConfig.json
 
 ## Running WhatsTheHype
 
-python3 main.py -t ticker -s subreddit -p day/week/biweek/month/quarter/half/year -o links/comments/all -v
+python3 main.py -t ticker -s subreddit -b # -a # -o links/comments/all -v
 
 \* arguments are required
 
@@ -45,26 +45,28 @@ python3 main.py -t ticker -s subreddit -p day/week/biweek/month/quarter/half/yea
 - -c (config) ./reddit/config/location
 - -t* ticker
 - -s* subreddit (do not include r/)
-- -p* (period) one of day/week/biweek/month/quarter/half/year
+- -b* (before) only give items before this # of days ago
+- -a* (after) only give items after this # of days ago
 - -o* (operation) one of links/comments/all
 - -v (verbose) prints dataframe info
 
 Example:
 
-python3 main.py -t TSLA -s wallstreetbets -p week -o all
+python3 main.py -t TSLA -s wallstreetbets -b 1 -a 8 -o all
 
 This will show how many times TSLA was mentioned on wallstreetbets (links and comments) the past week and compare with the past weeks market data
 
 ### Important Notes
 
-- Since we can only get 100 comments at a time due to api restrictions, searches with a bigger period will take a long time
+- Since we can only get 100 comments at a time due to api restrictions, searches with a bigger after-before range will take a long time
+- a before of 0 is not advised, since we normally have incomplete data for the current day
 - Use -v to see progress statements and print the dataframes when finished
 
 ## Findings
 
 It is important not to read too much into any of the data at this point, but here are some interesting findings
 
-parameters: -t gme -s wallstreetbets -p biweek -o links
+parameters: -t gme -s wallstreetbets -b 1 -a 15 -o links
 
 ![Image of gme-biweek-links](https://github.com/krleitch/WhatsTheHype/blob/main/examples/gme-biweek-links.png)
 
