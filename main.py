@@ -40,7 +40,7 @@ class WhatsTheHype:
             assert(self.before < self.after)
         except AssertionError:
             # TODO: Make this give more info for which assert
-            print('Invalid Before and After')
+            print('Invalid Before and/or After')
 
         # all tickers are less than 5
         try:
