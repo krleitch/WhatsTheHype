@@ -14,7 +14,7 @@ class GraphingClient:
         #  axes labels
         self.axes[0].set_ylabel('Price (USD)')
         self.axes[1].set_ylabel('Mentions')
-        self.axes[2].set_ylabel('Average Score')
+        self.axes[2].set_ylabel('Upvotes')
         self.axes[0].set_xlabel('Date')
         self.axes[1].set_xlabel('Date')
         self.axes[2].set_xlabel('Date')
@@ -30,27 +30,34 @@ class GraphingClient:
         self.axes[1].title.set_text(f'r/{subreddit} Mentions')
         self.axes[2].title.set_text(f'Average Score of Mentions')
 
-    def graphTickerAndSubredditData(self, subredditDataForPeriod, tickerHistoryForPeriod):
+    def graphTickerAndSubredditData(self, subredditDataForPeriod, tickerHistoryForPeriod, operation):
 
         # we only have a single data point
         if (len(subredditDataForPeriod.index) == 1):
-            # plot mentions
-            subredditDataForPeriod['Mentions'].plot(ax=self.axes[1], style='bx', label='Mentions')
             # plot prices
             tickerHistoryForPeriod['Close'].plot(ax=self.axes[0], style='rx', label='Close')
-            # plot score
-            subredditDataForPeriod['Avg Score'].plot(ax=self.axes[2], style='gx', label='Average Score')
+            # plot mentions and score
+            if ( operation in ['links', 'all'] ):
+                subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='bx', label='Links')
+                subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='gx', label='Links Average')
+            if ( operation in ['comments', 'all'] ):
+                subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='rx', label='Comments')
+                subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='rx', label='Max Comment')  
+
         else:
-            # plot mentions
-            subredditDataForPeriod['Mentions'].plot(ax=self.axes[1], style='b-', label='Mentions')
             # plot prices
             tickerHistoryForPeriod['Close'].plot(ax=self.axes[0], style='r-', label='Close')
             # calculate the rolling average if data set is large enough
             if ( len(subredditDataForPeriod.index) >= 100  ):
                 tickerHistoryForPeriod['MA50'] = tickerHistoryForPeriod['Close'].rolling(50).mean()
                 tickerHistoryForPeriod['MA50'].plot(ax=self.axes[0], style='y-', label='MA50')
-            # plot score
-            subredditDataForPeriod['Avg Score'].plot(ax=self.axes[2], style='g-', label='Average Score')   
+            # plot mentions and score
+            if ( operation in ['links', 'all'] ):
+                subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', label='Links')
+                subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', label='Links Average')
+            if ( operation in ['comments', 'all'] ):
+                subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', label='Comments')
+                subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', label='Max Comment')   
 
         # grid
         self.axes[0].grid()

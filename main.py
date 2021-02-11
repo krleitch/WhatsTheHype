@@ -83,7 +83,7 @@ class WhatsTheHype:
             print(tickerHistoryForPeriod)
 
         # graph data frames
-        self.graphingClient.graphTickerAndSubredditData(subredditDataForPeriod, tickerHistoryForPeriod)
+        self.graphingClient.graphTickerAndSubredditData(subredditDataForPeriod, tickerHistoryForPeriod, self.operation)
 
 if __name__ == "__main__":
 
