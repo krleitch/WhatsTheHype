@@ -42,12 +42,12 @@ class GraphingClient:
             totalLinks = subredditDataForPeriod['Links'].sum()
             if ( len(subredditDataForPeriod.index) >= movingAverageLimit  ):
                 subredditDataForPeriod['LMA50'] = subredditDataForPeriod['Links'].rolling(25).mean()
-                subredditDataForPeriod['LMA50'].plot(ax=self.axes[1], style='y-', label=f'Links MA25 ({totalLinks} Total)')  
+                subredditDataForPeriod['LMA50'].plot(ax=self.axes[1], style='c-', label=f'Links MA25 ({totalLinks} Total)')  
             else:
                 if ( len(subredditDataForPeriod.index) > markerLimit ):
-                    subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', label=f'Links ({totalLinks} Total)')
+                    subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='c-', label=f'Links ({totalLinks} Total)')
                 else:
-                    subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', marker='o', label=f'Links ({totalLinks} Total)')
+                    subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='c-', marker='o', label=f'Links ({totalLinks} Total)')
         if ( operation in ['comments', 'all'] ):
             # TODO: change from float in df to int, not here
             totalUniqueComments = int(subredditDataForPeriod['Comments'].sum())       
@@ -56,9 +56,9 @@ class GraphingClient:
                 subredditDataForPeriod['CMA50'].plot(ax=self.axes[1], style='m-', label=f'Comments MA25 ({totalUniqueComments} Total Unique)')
             else:
                 if ( len(subredditDataForPeriod.index) > markerLimit ):
-                    subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', label=f'Comments ({totalUniqueComments} Total Unique)')
+                    subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='m-', label=f'Comments ({totalUniqueComments} Total Unique)')
                 else:
-                    subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', marker='o', label=f'Comments ({totalUniqueComments} Total Unique)')
+                    subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='m-', marker='o', label=f'Comments ({totalUniqueComments} Total Unique)')
             totalComments = subredditDataForPeriod['Total Comments'].sum()
             self.axes[1].plot([], [], ' ', label=f'{totalComments} Total Comments')
 
@@ -76,18 +76,18 @@ class GraphingClient:
                 subredditDataForPeriod['LAMA50'].plot(ax=self.axes[2], style='y-', label='Links Avg MA25')
             else:
                 if ( len(subredditDataForPeriod.index) > markerLimit ):
-                    subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', label='Links Average')
+                    subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='y-', label='Links Average')
                 else:
-                    subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', marker='o', label='Links Average')
+                    subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='y-', marker='o', label='Links Average')
         if ( operation in ['comments', 'all'] ):
             if ( len(subredditDataForPeriod.index) >= movingAverageLimit  ):
                 subredditDataForPeriod['CMMA50'] = subredditDataForPeriod['Comments Max'].rolling(25).mean()
-                subredditDataForPeriod['CMMA50'].plot(ax=self.axes[2], style='m-', label='Comments Max MA25')
+                subredditDataForPeriod['CMMA50'].plot(ax=self.axes[2], style='b-', label='Comments Max MA25')
             else:
                 if ( len(subredditDataForPeriod.index) > markerLimit ):
-                    subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', label='Max Comment')    
+                    subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='b-', label='Max Comment')    
                 else:
-                    subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', marker='o', label='Max Comment')
+                    subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='b-', marker='o', label='Max Comment')
 
         # grid
         self.axes[0].grid()
