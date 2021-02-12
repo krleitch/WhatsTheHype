@@ -32,15 +32,25 @@ class GraphingClient:
 
     def graphTickerAndSubredditData(self, subredditDataForPeriod, tickerHistoryForPeriod, operation):
 
+        # show markers for mentions and score if <= than this # of data points
+        markerLimit = 15
+
         # plot mentions
         if ( operation in ['links', 'all'] ):
             totalLinks = subredditDataForPeriod['Links'].sum()
-            subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', label=f'Links ({totalLinks} Total)')
+            if ( len(subredditDataForPeriod.index) > markerLimit ):
+                subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', label=f'Links ({totalLinks} Total)')
+            else:
+                subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', marker='o', label=f'Links ({totalLinks} Total)')
         if ( operation in ['comments', 'all'] ):
-            totalUniqueComments = subredditDataForPeriod['Comments'].sum()
-            subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', label=f'Comments ({totalUniqueComments} Unique Total)')
-        totalComments = subredditDataForPeriod['Total Comments'].sum()
-        self.axes[1].plot([], [], ' ', label=f'{totalComments} Total Comments')
+            # TODO: change from float in df to int, not here
+            totalUniqueComments = int(subredditDataForPeriod['Comments'].sum())
+            if ( len(subredditDataForPeriod.index) > markerLimit ):
+                subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', label=f'Comments ({totalUniqueComments} Total Unique)')
+            else:
+                subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', marker='o', label=f'Comments ({totalUniqueComments} Total Unique)')
+            totalComments = subredditDataForPeriod['Total Comments'].sum()
+            self.axes[1].plot([], [], ' ', label=f'{totalComments} Total Comments')
 
         # plot prices
         tickerHistoryForPeriod['Close'].plot(ax=self.axes[0], style='r-', label='Close')
@@ -51,9 +61,15 @@ class GraphingClient:
 
         # plot scores
         if ( operation in ['links', 'all'] ):
-            subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', label='Links Average')
+            if ( len(subredditDataForPeriod.index) > markerLimit ):
+                subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', label='Links Average')
+            else:
+                subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', marker='o', label='Links Average')
         if ( operation in ['comments', 'all'] ):
-            subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', label='Max Comment')    
+            if ( len(subredditDataForPeriod.index) > markerLimit ):
+                subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', label='Max Comment')    
+            else:
+                subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', marker='o', label='Max Comment')    
 
         # grid
         self.axes[0].grid()

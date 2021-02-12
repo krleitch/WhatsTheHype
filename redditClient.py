@@ -1,5 +1,6 @@
 import requests, json, time
 import pandas as pd
+import numpy as np
 from datetime import datetime, timedelta
 
 # TypedDict requires python 3.8+
@@ -28,6 +29,7 @@ class RedditClient:
         # add auth token to headers
         self.headers = {**headers, **{'Authorization': f"bearer {TOKEN}"}}
         self.verbose = verbose
+
 
     # before: #d
     # after: #d
@@ -87,6 +89,7 @@ class RedditClient:
         if (self.verbose):
             print(str(totalUsed) + '/' + str(totalReceived) + ' total links aggregated')
 
+
     # after: #d or epoch time
     def __getSubredditDataForCommentsForPeriod(self, subreddit: str, ticker: str, before: int, after: int, mentions):
 
@@ -117,6 +120,7 @@ class RedditClient:
             if (self.verbose):
                 print(str(totalReceived) + ' Comments Fetched', end="\r", flush=True)
 
+        # unique link_id per day
         unique = {}
         totalUsed = 0
         # fill in mentions from comments
@@ -127,16 +131,35 @@ class RedditClient:
             if str_date in mentions :
                 totalUsed += 1
                 # add to unique mentions
-                if ( not c['link_id'] in unique ):
+                if ( not str_date in unique ):
+                    unique[str_date] = {}
+                if ( not c['link_id'] in unique[str_date] ):
                     mentions[str_date][2] += 1
-                    unique[c['link_id']] = True
-                # find max scorre for the day
+                    unique[str_date][c['link_id']] = True
+                # find max score for the day
                 mentions[str_date][3] = max(c['score'], mentions[str_date][3])
                 # keep track of total number of comments for the day
                 mentions[str_date][4] += 1
 
         if (self.verbose):
             print(str(totalUsed) + '/' + str(totalReceived) + ' total comments aggregated')
+
+    # the comment api data is not always up to date for every day
+    # take an educated guess at when comment data is incomplete
+    def __removeIncompleteCommentData(self, df):
+
+        # if we have less than threshold # of comments, we are guessing that
+        # seeing a 0 means incomplete data, not that there are actually 0 comments
+        # don't include the 0's in the mean calculation
+        threshold = 5
+        avg = df['Comments'].replace(0, np.nan).mean()
+
+        if ( avg > threshold ):
+            # replace wtih pd.nan
+            cols = ['Comments', 'Comments Max']
+            df[cols] = df[cols].replace(0, np.nan)
+        
+        return df
 
     # after: #d
     # before: #d
@@ -178,6 +201,9 @@ class RedditClient:
         df = pd.DataFrame.from_dict(mentions, orient='index', columns=['Links', 'Links Avg Score', 'Comments', 'Comments Max', 'Total Comments'])
         # convert index from string to datetime
         df.index = pd.to_datetime(df.index)
+
+        # if we have incomplete comment data replace 0 with pd.nan
+        df = self.__removeIncompleteCommentData(df)
 
         # return the filled in dataframe
         return df
