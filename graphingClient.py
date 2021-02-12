@@ -34,51 +34,69 @@ class GraphingClient:
 
         # show markers for mentions and score if <= than this # of data points
         markerLimit = 15
+        # show averages if more than this # of of data points
+        movingAverageLimit = 50
 
         # plot mentions
         if ( operation in ['links', 'all'] ):
             totalLinks = subredditDataForPeriod['Links'].sum()
-            if ( len(subredditDataForPeriod.index) > markerLimit ):
-                subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', label=f'Links ({totalLinks} Total)')
+            if ( len(subredditDataForPeriod.index) >= movingAverageLimit  ):
+                subredditDataForPeriod['LMA50'] = subredditDataForPeriod['Links'].rolling(25).mean()
+                subredditDataForPeriod['LMA50'].plot(ax=self.axes[1], style='y-', label=f'Links MA25 ({totalLinks} Total)')  
             else:
-                subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', marker='o', label=f'Links ({totalLinks} Total)')
+                if ( len(subredditDataForPeriod.index) > markerLimit ):
+                    subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', label=f'Links ({totalLinks} Total)')
+                else:
+                    subredditDataForPeriod['Links'].plot(ax=self.axes[1], style='b-', marker='o', label=f'Links ({totalLinks} Total)')
         if ( operation in ['comments', 'all'] ):
             # TODO: change from float in df to int, not here
-            totalUniqueComments = int(subredditDataForPeriod['Comments'].sum())
-            if ( len(subredditDataForPeriod.index) > markerLimit ):
-                subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', label=f'Comments ({totalUniqueComments} Total Unique)')
+            totalUniqueComments = int(subredditDataForPeriod['Comments'].sum())       
+            if ( len(subredditDataForPeriod.index) >= movingAverageLimit  ):
+                subredditDataForPeriod['CMA50'] = subredditDataForPeriod['Comments'].rolling(25).mean()
+                subredditDataForPeriod['CMA50'].plot(ax=self.axes[1], style='m-', label=f'Comments MA25 ({totalUniqueComments} Total Unique)')
             else:
-                subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', marker='o', label=f'Comments ({totalUniqueComments} Total Unique)')
+                if ( len(subredditDataForPeriod.index) > markerLimit ):
+                    subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', label=f'Comments ({totalUniqueComments} Total Unique)')
+                else:
+                    subredditDataForPeriod['Comments'].plot(ax=self.axes[1], style='r-', marker='o', label=f'Comments ({totalUniqueComments} Total Unique)')
             totalComments = subredditDataForPeriod['Total Comments'].sum()
             self.axes[1].plot([], [], ' ', label=f'{totalComments} Total Comments')
 
         # plot prices
         tickerHistoryForPeriod['Close'].plot(ax=self.axes[0], style='r-', label='Close')
         # calculate the rolling average if data set is large enough
-        if ( len(subredditDataForPeriod.index) >= 100  ):
-            tickerHistoryForPeriod['MA50'] = tickerHistoryForPeriod['Close'].rolling(50).mean()
-            tickerHistoryForPeriod['MA50'].plot(ax=self.axes[0], style='y-', label='MA50')
+        if ( len(subredditDataForPeriod.index) >= movingAverageLimit ):
+            tickerHistoryForPeriod['MA50'] = tickerHistoryForPeriod['Close'].rolling(25).mean()
+            tickerHistoryForPeriod['MA50'].plot(ax=self.axes[0], style='y-', label='MA25')
 
         # plot scores
         if ( operation in ['links', 'all'] ):
-            if ( len(subredditDataForPeriod.index) > markerLimit ):
-                subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', label='Links Average')
+            if ( len(subredditDataForPeriod.index) >= movingAverageLimit  ):
+                subredditDataForPeriod['LAMA50'] = subredditDataForPeriod['Links Avg Score'].rolling(25).mean()
+                subredditDataForPeriod['LAMA50'].plot(ax=self.axes[2], style='y-', label='Links Avg MA25')
             else:
-                subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', marker='o', label='Links Average')
+                if ( len(subredditDataForPeriod.index) > markerLimit ):
+                    subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', label='Links Average')
+                else:
+                    subredditDataForPeriod['Links Avg Score'].plot(ax=self.axes[2], style='g-', marker='o', label='Links Average')
         if ( operation in ['comments', 'all'] ):
-            if ( len(subredditDataForPeriod.index) > markerLimit ):
-                subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', label='Max Comment')    
+            if ( len(subredditDataForPeriod.index) >= movingAverageLimit  ):
+                subredditDataForPeriod['CMMA50'] = subredditDataForPeriod['Comments Max'].rolling(25).mean()
+                subredditDataForPeriod['CMMA50'].plot(ax=self.axes[2], style='m-', label='Comments Max MA25')
             else:
-                subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', marker='o', label='Max Comment')    
+                if ( len(subredditDataForPeriod.index) > markerLimit ):
+                    subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', label='Max Comment')    
+                else:
+                    subredditDataForPeriod['Comments Max'].plot(ax=self.axes[2], style='r-', marker='o', label='Max Comment')
 
         # grid
         self.axes[0].grid()
         self.axes[1].grid()
         self.axes[2].grid()
         # legend
-        self.axes[0].legend()
-        self.axes[1].legend()
-        self.axes[2].legend()
+        self.axes[0].legend(loc='upper right')
+        self.axes[1].legend(loc='upper right')
+        self.axes[2].legend(loc='upper right')
         # show plots
         plt.show()
 
