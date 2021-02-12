@@ -34,7 +34,8 @@ class GraphingClient:
 
         # show markers for mentions and score if <= than this # of data points
         markerLimit = 15
-        # show averages if more than this # of of data points
+        # show averages if more than this # of of data points for mentions and scores
+        # close price is always shown
         movingAverageLimit = 50
 
         # plot mentions
@@ -63,7 +64,10 @@ class GraphingClient:
             self.axes[1].plot([], [], ' ', label=f'{totalComments} Total Comments')
 
         # plot prices
-        tickerHistoryForPeriod['Close'].plot(ax=self.axes[0], style='r-', label='Close')
+        if ( len(subredditDataForPeriod.index) > markerLimit ):
+            tickerHistoryForPeriod['Close'].plot(ax=self.axes[0], style='r-', label='Close')
+        else:
+            tickerHistoryForPeriod['Close'].plot(ax=self.axes[0], style='r-', marker='o', label='Close')
         # calculate the rolling average if data set is large enough
         if ( len(subredditDataForPeriod.index) >= movingAverageLimit ):
             tickerHistoryForPeriod['MA50'] = tickerHistoryForPeriod['Close'].rolling(25).mean()
