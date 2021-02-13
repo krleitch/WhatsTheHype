@@ -22,8 +22,8 @@ cd /Applications/Python\ 3.9/
 
 ### Create Reddit Config
 
-- Place redditConfig.json in main folder
-- you can also use -c to specify another config location
+- Place redditConfig.json in main folder.
+- you can also use -c to specify another config location.
 
 redditConfig.json
 ```
@@ -37,7 +37,9 @@ redditConfig.json
 
 ## Running WhatsTheHype
 
-python3 main.py -t ticker -s subreddit -b # -a # -o links/comments/all -v
+```
+python3 main.py -t ticker -s subreddit -b #days -a #days -o links/comments/all -v
+```
 
 \* arguments are required
 
@@ -52,15 +54,23 @@ python3 main.py -t ticker -s subreddit -b # -a # -o links/comments/all -v
 
 Example:
 
-python3 main.py -t TSLA -s wallstreetbets -b 1 -a 8 -o all
+```
+python3 main.py -t tsla -s wallstreetbets -b 1 -a 8 -o all
+```
 
-This will show how many times TSLA was mentioned on wallstreetbets (links and comments) the past week and compare with the past weeks market data
+This will show how many times TSLA was mentioned on wallstreetbets (links and comments) after 8 days ago but before 1 day ago then comparing with the past weeks market data.
+
+Types of Charts:
+
+- For large data sets (currently >= 50). The Moving Average with 25 data points is shown for mentions and scores. This is because we are more focused on the trend which is easier to see with the MA than with the large amount of data points.
+- For small sets ( curently <= 15 ) individual data markers are set.
+- The parameters for these can be found in graphingClient.py if you ever need to change or remove them. In The future there will be options to change chart types from the command line.
 
 ### Important Notes
 
-- Since we can only get 100 comments at a time due to api restrictions, searches with a bigger after-before range will take a long time
-- a before of 0 is not advised, since we normally have incomplete data for the current day
-- Use -v to see progress statements and print the dataframes when finished
+- Since we can only get 100 comments at a time due to api restrictions, searches with a bigger after - before range will take a long time.
+- A before of 0 for comments is not advised since we normally have incomplete comment data for the current day.
+- Use -v to see progress info and print the dataframes when finished.
 
 ## Findings
 
@@ -78,17 +88,18 @@ parameters: -t gme -s wallstreetbets -b 1 -a 15 -o links
 
 ## Known Issues
 
-- The charts are only as good as the data available. Sometimes pushshift comments for the current orr previous day are not available at the time of running  giving skewing results
+The charts are only as good as the data available. A couple issues have been seen with data availability
+- Comment data for the current day and some time periods is unavailable. Currently an educated guess is taken when these occur and the data is excluded. Remember pushshift API is not maintained directly by reddit.
+- Link data can be innacurate for large time spans. The reddit API does not like returning results from years ago. More Investigation is needed.
 
 ## Future Plans
 
-- Currently this project is just a way to aggregate and display data
-- I would like to expand this into the ability to discover new tickers that are trending upwards in mentions
-- Comparing with past market data it could be an interesting take on what makes market buzz
-- Can also compare different subreddits and see which ones catch on faster
+- Currently this project is just a way to aggregate and display data trends.
+- I would like to expand this into the ability to discover new tickers that are trending upwards in mentions.
+- Comparing with past market data it could be an interesting take on what makes market buzz.
+- Can also compare different subreddits and see which ones catch on faster.
 
 ### Planned Changes
 
-- Rights now comments vastly overpower links, making the 'all' operation too similar to comments
-- A possible soluution is weighing scores more, limited mentions to a link_id...
-- Likewise, Average Score means less for comments, when there are so many... a better measure is needed... (weight number of replies or discussion)
+- I think there is a lot more to what makes a comment or link special than just the number of upvotes it gets. Looking into generating a *hype* scoe based on multiple factors including score, number of replies, upvote-downvote ration... could be interesting.
+- All links and comments may also be needed to be weighted differently.
