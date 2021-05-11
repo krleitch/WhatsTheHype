@@ -76,9 +76,29 @@ Types of Charts:
 
 It is important not to read too much into any of the data at this point, but here are some interesting findings
 
-parameters: -t gme -s wallstreetbets -b 1 -a 15 -o links
+### Arguments: -t gme -s wallstreetbets -b 1 -a 15 -o links
 
-![Image of gme-biweek-links](https://github.com/krleitch/WhatsTheHype/blob/main/examples/gme-biweek-links.png)
+![gme-biweek-links](https://github.com/krleitch/WhatsTheHype/blob/main/examples/gme-biweek-links.png)
+
+### Arguments: -t gme -s wallstreetbets -b 1 -a 30 -o links
+
+![gme-wallstreetbets-links-month](https://github.com/krleitch/WhatsTheHype/blob/main/examples/gme-wallstreetbets-links-month.png)
+
+### Arguments: -t spy -s personalfinance -b 1 -a 365 -o all
+
+![spy-personalfinance-all-year](https://github.com/krleitch/WhatsTheHype/blob/main/examples/spy-personalfinance-all-year.png)
+
+### Arguments: -t tsla -s personalfinance -b 1 -a 365 -o all
+
+![tsla-personalfinance-all-year](https://github.com/krleitch/WhatsTheHype/blob/main/examples/tsla-personalfinance-all-year.png)
+
+### Arguments: -t tsla -s stocks -b 1 -a 365 -o all
+
+![tsla-stocks-all-year](https://github.com/krleitch/WhatsTheHype/blob/main/examples/tsla-stocks-all-year.png)
+
+### Arguments: -t tsla -s wallstreetbets -b 1 -a 365 -o all
+
+![tsla-wallstreetbets-all-365](https://github.com/krleitch/WhatsTheHype/blob/main/examples/tsla-wallstreetbets-all-365.png)
 
 ## API Resources
 
