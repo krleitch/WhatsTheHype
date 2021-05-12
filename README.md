@@ -121,5 +121,5 @@ The charts are only as good as the data available. A couple issues have been see
 
 ### Planned Changes
 
-- I think there is a lot more to what makes a comment or link special than just the number of upvotes it gets. Looking into generating a *hype* scoe based on multiple factors including score, number of replies, upvote-downvote ration... could be interesting.
+- I think there is a lot more to what makes a comment or link special than just the number of upvotes it gets. Looking into generating a *hype* score based on multiple factors including score, number of replies, upvote-downvote ration... could be interesting.
 - All links and comments may also be needed to be weighted differently.
